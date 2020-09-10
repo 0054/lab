@@ -1,0 +1,9 @@
+---
+- hosts: '{{ host }}'
+  become: true
+  become_user: root
+  become_method: sudo
+  # gather_facts: false
+  roles:
+    - postgresql-server
+    - postgres-exporter

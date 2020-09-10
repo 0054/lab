@@ -1,0 +1,33 @@
+version: "2"
+services:
+  # nginx:
+  #   image: "nginx:alpine"
+  #   ports:
+  #     - 5043:443
+  #   links:
+  #     - registry:registry
+  #   volumes:
+  #     - /registry/auth:/etc/nginx/conf.d
+  #     - /registry/auth/nginx.conf:/etc/nginx/nginx.conf:ro
+
+  # registry:
+  #   image: registry:2
+  #   volumes:
+  #     - /registry/data:/var/lib/registry
+  registry:
+    restart: always
+    image: registry:2
+    ports:
+      - 5000:5000
+    environment:
+      REGISTRY_HTTP_TLS_CERTIFICATE: /auth/domain.crt
+      REGISTRY_HTTP_TLS_KEY: /auth/domain.key
+      REGISTRY_AUTH: htpasswd
+      REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
+      REGISTRY_AUTH_HTPASSWD_REALM: Registry Realm
+    volumes:
+      - /registry/data:/var/lib/registry
+      - /registry/auth:/auth
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+
