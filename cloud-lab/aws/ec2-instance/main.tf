@@ -17,6 +17,8 @@ data "aws_vpc" "default" {
   default = true
 }
 
+
+# Получаем id подсеток
 data "aws_subnet_ids" "all" {
   vpc_id = data.aws_vpc.default.id
 }
@@ -31,7 +33,6 @@ data "aws_ami" "ami" {
     ]
   }
 }
-
 
 
 # resource "aws_key_pair" "key" {
