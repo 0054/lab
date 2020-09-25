@@ -26,12 +26,14 @@ resource "aws_security_group" "allow_ssh" {
   name        = "allow_ssh"
   description = "open ssh port"
   # vpc_id      = data.aws_vpc.default.id
+  # входящий трафик
   ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  # исходящий трафик
   egress {
     from_port   = 0
     to_port     = 0
