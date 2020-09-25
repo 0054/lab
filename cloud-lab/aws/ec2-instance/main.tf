@@ -3,97 +3,56 @@
 # github.com/0054
 #
 provider "aws" {}
-# export AWS_ACCESS_KEY_ID="anaccesskey"
+# export AWS_ACESS_KEY_ID="anaccesskey"
 # export AWS_SECRET_ACCESS_KEY="asecretkey"
 # export AWS_DEFAULT_REGION="us-west-2"
 
 
-# Выбираем текущий регион
-data "aws_region" "current_region" {}
+resource "aws_instance" "web" {
+  # аттачим ami
+  ami           = data.aws_ami.amazon_linux.id
+  instance_type = "t2.micro"
+  # аттачим ключ
+  key_name = aws_key_pair.aws_key.id
+  # аттачим сеьюрити группы
+  vpc_security_group_ids = [aws_security_group.allow_ssh.id]
 
-
-# Выбираем дефлотный VPC
-data "aws_vpc" "default" {
-  default = true
-}
-
-
-# Получаем id подсеток
-data "aws_subnet_ids" "all" {
-  vpc_id = data.aws_vpc.default.id
-}
-
-data "aws_ami" "ami" {
-  most_recent = true
-  owners      = ["aws-marketplace"]
-  filter {
-    name = "name"
-    values = [
-      "CentOS Linux 7 x86_64 HVM EBS ENA*",
-    ]
+  tags = {
+    Name = "amazon_linux_t2_micro"
   }
 }
 
+resource "aws_security_group" "allow_ssh" {
+  name        = "allow_ssh"
+  description = "open ssh port"
+  # vpc_id      = data.aws_vpc.default.id
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  tags = {
+    Name = "allow_ssh"
+  }
+}
 
-# resource "aws_key_pair" "key" {
-#   key_name   = "key"
-#   public_key = var.config.rsa_public_key
-# }
+data "aws_ami" "amazon_linux" {
+  owners      = ["amazon"]
+  most_recent = true
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-hvm-*-x86_64-ebs"]
+  }
+}
 
-
-
-# data "aws_ami_ids" "ubuntu" {
-#   owners = "amazon"
-#   filter {
-#     name   = "name"
-#     values = ["ubuntu/images/ubuntu-*-*-amd64-server-*"]
-#   }
-# }
-
-
-# data "aws_ami" "ubuntu" {
-#   most_recent = true
-#   filter {
-#     name   = "name"
-#     values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
-#   }
-#   filter {
-#     }
-#     name   = "virtualization-type"
-#     values = ["hvm"]
-#   }
-#   owners = ["099720109477"] # Canonical
-# }
-
-
-
-
-# resource "aws_instance" "web" {
-#   ami           = data.aws_ami.ubuntu.id
-#   instance_type = "t3.micro"
-#   tags = {
-#     Name = "HelloWorld"
-#   }
-# }
-
-# resource "aws_security_group" "allow_ssh" {
-#   name        = "allow_ssh"
-#   description = "ssh"
-#   vpc_id      = var.config.vpc_id
-#   ingress {
-#     from_port   = 22
-#     to_port     = 22
-#     protocol    = "tcp"
-#     cidr_blocks = ["0.0.0.0/0"]
-#   }
-#   egress {
-#     from_port   = 0
-#     to_port     = 0
-#     protocol    = "-1"
-#     cidr_blocks = ["0.0.0.0/0"]
-#   }
-#   tags = {
-#     Name = "sec_group_ssh"
-#   }
-# }
-
+resource "aws_key_pair" "aws_key" {
+  key_name   = "aws_key"
+  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDjx9/lOq+nllhmNG8NVNlSsUu5EAl6C0eGZZP4Z76xrpQZ3Tw3hwh09KljC9yjFUJa+QmtWLNU0DliaNVZvGdnBm4tGfOVchsftdTbbtNMi2bPnWe5aw1r9GUUCUEaMwU/q+iJAcEu1CZyiHDsjv5CXDgJg9Ow0XSAIPENdTj0NaIzLAzcWFFLk/Bmm7okislb02Q2En0nuZ0YMVanRtAa/kNgK14hFmCLz3gis6fNGDeHSDClFMy96IAC72yckblvsUlgG59frpLgfmJnEd+KPlL3W4fmGcb5jDozuE0ppxePyVQgUQ88/1ZDu7SpQamch50+/CBd9q5AA3crCyXT"
+}
