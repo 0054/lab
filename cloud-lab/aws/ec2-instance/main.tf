@@ -3,12 +3,12 @@
 # github.com/0054
 #
 provider "aws" {}
-# export AWS_ACESS_KEY_ID="anaccesskey"
-# export AWS_SECRET_ACCESS_KEY="asecretkey"
+# export AWS_ACESS_KEY_ID="acesskeyid"
+# export AWS_SECRET_ACESS_KEY="acesskey"
 # export AWS_DEFAULT_REGION="us-west-2"
 
 
-resource "aws_instance" "web" {
+resource "aws_instance" "docker" {
   # аттачим ami
   ami           = data.aws_ami.amazon_linux.id
   instance_type = "t2.micro"
@@ -16,6 +16,9 @@ resource "aws_instance" "web" {
   key_name = aws_key_pair.aws_key.id
   # аттачим сеьюрити группы
   vpc_security_group_ids = [aws_security_group.allow_ssh.id]
+
+  # скрипт который выполняется при разворачивании сервера
+  user_data = file("./user_data/docker_server.sh")
 
   tags = {
     Name = "amazon_linux_t2_micro"
@@ -30,6 +33,12 @@ resource "aws_security_group" "allow_ssh" {
   ingress {
     from_port   = 22
     to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port   = 80
+    to_port     = 80
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -56,5 +65,5 @@ data "aws_ami" "amazon_linux" {
 
 resource "aws_key_pair" "aws_key" {
   key_name   = "aws_key"
-  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDjx9/lOq+nllhmNG8NVNlSsUu5EAl6C0eGZZP4Z76xrpQZ3Tw3hwh09KljC9yjFUJa+QmtWLNU0DliaNVZvGdnBm4tGfOVchsftdTbbtNMi2bPnWe5aw1r9GUUCUEaMwU/q+iJAcEu1CZyiHDsjv5CXDgJg9Ow0XSAIPENdTj0NaIzLAzcWFFLk/Bmm7okislb02Q2En0nuZ0YMVanRtAa/kNgK14hFmCLz3gis6fNGDeHSDClFMy96IAC72yckblvsUlgG59frpLgfmJnEd+KPlL3W4fmGcb5jDozuE0ppxePyVQgUQ88/1ZDu7SpQamch50+/CBd9q5AA3crCyXT"
+  public_key = file("../rsa/id_rsa.pub")
 }

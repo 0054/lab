@@ -14,3 +14,7 @@
 # output "subnets" {
 #   value = data.aws_subnet_ids.all.ids
 # }
+#
+output "instance" {
+  value = aws_instance.docker.*.public_ip
+}
