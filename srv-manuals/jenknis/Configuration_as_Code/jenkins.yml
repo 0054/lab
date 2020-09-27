@@ -1,0 +1,143 @@
+jenkins:
+  systemMessage: "Jenkins Configured using Code"
+  numExecutors: 7
+  mode: NORMAL
+  scmCheckoutRetryCount: 3
+  labelString: "master-1"  
+
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+       - id: admin
+         password: ${adminpw:-admin}
+
+  authorizationStrategy:
+    globalMatrix:
+      grantedPermissions:
+        - "Overall/Read:anonymous"
+        - "Job/Read:anonymous"
+        - "View/Read:anonymous"
+        - "Overall/Administer:anonymous"
+
+  crumbIssuer: "standard"
+
+plugins:
+  required:
+    ace-editor: latest
+    ant: latest
+    antisamy-markup-formatter: latest
+    apache-httpcomponents-client-4-api: latest
+    bootstrap4-api: latest
+    bouncycastle-api: latest
+    branch-api: latest
+    build-timeout: latest
+    cloudbees-folder: latest
+    command-launcher: latest
+    credentials: latest
+    credentials-binding: latest
+    display-url-api: latest
+    durable-task: latest
+    echarts-api: latest
+    email-ext: latest
+    font-awesome-api: latest
+    git: latest
+    git-client: latest
+    git-server: latest
+    github: latest
+    github-api: latest
+    github-branch-source: latest
+    gitlab-hook: latest
+    gitlab-plugin: latest
+    gradle: latest
+    handlebars: latest
+    jackson2-api: latest
+    jdk-tool: latest
+    jquery-detached: latest
+    jquery3-api: latest
+    jsch: latest
+    junit: latest
+    ldap: latest
+    lockable-resources: latest
+    mailer: latest
+    matrix-auth: latest
+    matrix-project: latest
+    momentjs: latest
+    okhttp-api: latest
+    pam-auth: latest
+    pipeline-build-step: latest
+    pipeline-github-lib: latest
+    pipeline-graph-analysis: latest
+    pipeline-input-step: latest
+    pipeline-milestone-step: latest
+    pipeline-model-api: latest
+    pipeline-model-definition: latest
+    pipeline-model-extensions: latest
+    pipeline-rest-api: latest
+    pipeline-stage-step: latest
+    pipeline-stage-tags-metadata: latest
+    pipeline-stage-view: latest
+    plain-credentials: latest
+    plugin-util-api: latest
+    popper-api: latest
+    resource-disposer: latest
+    ruby-runtime: latest
+    scm-api: latest
+    script-security: latest
+    snakeyaml-api: latest
+    ssh-credentials: latest
+    ssh-slaves: latest
+    structs: latest
+    timestamper: latest
+    token-macro: latest
+    trilead-api: latest
+    windows-slaves: latest
+    workflow-aggregator: latest
+    workflow-api: latest
+    workflow-basic-steps: latest
+    workflow-cps: latest
+    workflow-cps-global-lib: latest
+    workflow-durable-task-step: latest
+    workflow-job: latest
+    workflow-multibranch: latest
+    workflow-scm-step: latest
+    workflow-step-api: latest
+    workflow-support: latest
+    ws-cleanup: latest
+    
+unclassified:
+  location:
+    adminAddress: "jenkins@example.com"
+    url: "http://localhost:8080/"
+
+tool:
+  git:
+    installations:
+      - name: Default
+        home: "git"
+
+  # jdk:
+  #   installations:
+  #     - name: "open-jdk8"
+  #       properties:
+  #         - installSource:
+  #             installers:
+  #               - adoptOpenJdkInstaller:
+  #                   id: "jdk8u232-b09"
+  #     - name: "oracle-jdk8"
+  #       properties:
+  #         - installSource:
+  #             installers:
+  #               - jdkInstaller:
+  #                   acceptLicense: true
+  #                   id: "jdk-8u221-oth-JPR"
+
+  # maven:
+  #   installations:
+  #     - name: "Maven 3"
+  #       properties:
+  #         - installSource:
+  #             installers:
+  #               - maven:
+  #                   id: "3.5.4"
+
