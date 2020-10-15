@@ -198,3 +198,146 @@ telemetry.optIn: false
 telemetry.enabled: false
 ```
 
+
+# Настройка подключения к LDAPS
+
+в первую очередь настраиваем параметры подключения к LDPAS в 
+plugins/opendistro_security/securityconfig/config.yml
+```
+---                                                                                                                                                                                                                  
+_meta:                         
+  type: "config"               
+  config_version: 2          
+config:                                                        
+  dynamic:                                   
+    http:                       
+      anonymous_auth_enabled: false
+      xff:                 
+        enabled: false     
+        internalProxies: '192\.168\.0\.10|192\.168\.0\.11' # regex pattern
+    authc:                                                                  
+      kerberos_auth_domain:
+        http_enabled: false            
+        transport_enabled: false         
+        order: 6               
+        http_authenticator:                                     
+          type: kerberos  
+          challenge: true                             
+          config:          
+            krb_debug: false    
+            strip_realm_from_principal: true
+        authentication_backend:
+          type: noop           
+      basic_internal_auth_domain:
+        description: "Authenticate via HTTP Basic against internal users database"
+        http_enabled: true                                                    
+        transport_enabled: true        
+        order: 4                         
+        http_authenticator:        
+          type: basic        
+          challenge: true
+        authentication_backend:
+          type: intern
+      proxy_auth_domain:
+        description: "Authenticate via proxy"
+        http_enabled: false
+        transport_enabled: false
+        order: 3
+        http_authenticator:
+          type: proxy
+          challenge: false
+          config:
+            user_header: "x-proxy-user"
+            roles_header: "x-proxy-roles"
+        authentication_backend:
+          type: noop
+      jwt_auth_domain:
+        description: "Authenticate via Json Web Token"
+        http_enabled: false
+        transport_enabled: false
+        order: 0
+        http_authenticator:
+          type: jwt
+          challenge: false
+          config:
+            signing_key: "base64 encoded HMAC key or public RSA/ECDSA pem key"
+            jwt_header: "Authorization"
+            jwt_url_parameter: null
+            roles_key: null
+            subject_key: null
+        authentication_backend:
+          type: noop
+      clientcert_auth_domain:
+        description: "Authenticate via SSL client certificates"
+        http_enabled: false
+        transport_enabled: false
+        order: 2
+        http_authenticator:
+          type: clientcert
+          config:
+            username_attribute: cn #optional, if omitted DN becomes username
+          challenge: false
+        authentication_backend:
+          type: noop
+      ldap:
+        description: "Authenticate via LDAP or Active Directory"
+        http_enabled: true
+        transport_enabled: false
+        order: 1
+        http_authenticator:
+          type: basic
+          challenge: false
+        authentication_backend:
+          type: ldap
+          config:
+            enable_ssl: true
+            enable_start_tls: false
+            enable_ssl_client_auth: false
+            verify_hostnames: false
+            hosts:
+            - ldap.server.com:636
+            bind_dn: 'CN=Administrator,CN=Users,DC=example,DC=local'
+            password: '1qaz@WSX'
+            userbase: 'cn=users,dc=example,dc=local'
+            usersearch: '(sAMAccountName={0})'
+            username_attribute: "cn"
+    authz:
+      roles_from_myldap:
+        description: "Authorize via LDAP or Active Directory"
+        http_enabled: true
+        transport_enabled: false
+        authorization_backend:
+          type: ldap
+          config:
+            enable_ssl: true
+            enable_start_tls: false
+            enable_ssl_client_auth: false
+            verify_hostnames: false
+            hosts:
+            - ldap.server.com:636
+            bind_dn: 'CN=Administrator,CN=Users,DC=example,DC=local'
+            password: '1qaz@WSX'
+            rolebase: 'CN=Users,dc=example,dc=local'
+            rolesearch: '(member={0})'
+            userroleattribute: null
+            userrolename: disabled
+            rolename: cn
+            resolve_nested_roles: false
+            userbase: 'cn=users,dc=example,dc=local'
+            usersearch: '(sAMAccountName={0})'
+```
+мы актикивровали последние 2 auth провайдера и поставили LDAP провайдера на 1ое место в очереди 
+в блоке `ldap` мы настраиваем аутентификацию 
+в блоке `authz` мы настраиваем авторизацию через LDAP
+
+тк мой LDAP сервер не имеем доверенного сертификата то его надо добавить в truststore
+```
+# испорт сертификата 
+keytool -printcert -sslserver ldap.server.com:636 -rfc > ldap.cer
+keytool -import -v -trustcacerts -alias ad-ldap-cert -file ldap.cer -keystore ldap.truststore -storepass changeit
+```
+и прописать в конфиг elasticsearch.yml
+```
+opendistro_security.ssl.transport.truststore_filepath: /opt/afs/elasticsearch/config/ldap.truststore
+opendistro_security.ssl.transport.truststore_password: changeit
+```
