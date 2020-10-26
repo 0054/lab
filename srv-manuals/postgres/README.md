@@ -3,9 +3,60 @@
 
 ## бекап
 
+### pg_dump
 с удалённого сервера
 ```
 pg_dump -U postgres -h 10.10.10.10 -d db_name --exclude-table='table_name' -F t > db_name.dump
+```
+
+### pg_basebackup
+
+#### настраиваем wal журналы
+в конфиге postgres.conf
+```
+archive_mode = always
+archive_command = '/path/to/wal_backup.sh %f %p'
+archive_timeout = 3600
+```
+wal_backup.sh
+```
+#!/usr/bin/env bash
+
+FILENAME=$1
+FULLNAME=$2
+REMOTE_HOST=vm001.example.com
+
+gzip -c -9 $FULLNAME > $FILENAME.gz
+
+ssh $REMOVE_HOST "set -e; test ! -f /pg_backup/wal/$FILENAME.gz"
+scp $FILENAME.gz $REMOTE_HOST: /pg_backup/wal/
+rm -f $FILENAME.gz
+```
+#### бекап базы
+```
+#!/usr/bin/env bash
+
+REMOTE_HOST=vm001.example.com
+
+DATE=$(date %Y-%m-%d-%H-%M)
+BACKUP_PATH=/path/to/backup/
+BACKUP_NAME=$BACKUP_PATH/db_backup_$DATE.tar.gz
+
+/usr/pgsql-11/bin/pg_basebackup --no-password --format=tar --wal-method=none --pgdata=- | pigz -9 -p 16 > $BACKUP_NAME
+
+scp $BACKUP_NAME $REMOTE_HOST:/pg_backup/base/
+
+rm -rf $BACKUP_PATH/*
+```
+#### восстановление бд
+
+1 - распаковываем архив в /data директорию
+2 - в recovery.conf надо указать команду рестора в нашем случае `restrore_command = 'gunzip < /pg_backup/wal/%f.gz > %p'`
+3 - если был кластер и нужно отдельно развернуть бд то удаляем все конфиги относящиеся к кластеру
+postgres.conf
+```
+cluster_name
+hot_standby
 ```
 
 
