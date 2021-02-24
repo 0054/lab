@@ -78,3 +78,15 @@ create subnets
 ```
 aws ec2 create-subnet --vpc-id vpc-0560d93e153c131ab --cidr-block 10.10.1.0/24
 ```
+
+## ECR
+
+### aws login ecr
+
+```
+aws ecr get-login-password \
+    --region <region> \
+| docker login \
+    --username AWS \
+    --password-stdin <aws_account_id>.dkr.ecr.<region>.amazonaws.com
+```
