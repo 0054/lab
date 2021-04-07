@@ -20,7 +20,7 @@ pip3 install awscli
 ### autocompletion for aws cli
 
 
-ищим где у нас установлен aws_completer `which aws_completer`
+ищем где у нас установлен aws_completer `which aws_completer`
 и добавляем в ~/.bashrc строку
 ```
 complete -C /usr/local/bin/aws_completer aws
