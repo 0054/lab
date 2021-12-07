@@ -1,5 +1,6 @@
 # Usage
 
+## настройка на centos/fedora
 - отключить в `/etc/libvirt/qemu.conf` selinux `security_driver = "selinux"` меняем на `security_driver = "none"`
 - перезапускаем сервис `systemctl restart libvirt-bin.service`
 
@@ -38,3 +39,14 @@ Format specific information:
     corrupt: false
 ```
 
+# Установка KVM
+
+## ubuntu 20.04
+```
+sudo apt install qemu qemu-kvm libvirt-daemon libvirt-clients bridge-utils virt-manager
+```
+### опционально устанавливаем вебинтерфейс для kvm
+```
+sudo apt install cockpit cockpit-machines
+sudo systemctl start cockpit
+```
